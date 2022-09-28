@@ -1,0 +1,33 @@
+function deleteSpecific_Columns() {
+  const keep = [1, 3]; // columns G and M
+  const newSheet = SpreadsheetApp.getActiveSheet();
+  deleteColumns_(newSheet, keep);
+}
+
+function deleteColumns_(sheet, columnsToKeep) {
+  // version 1.0, written by --Hyde, 13 June 2022
+  //   - see https://stackoverflow.com/q/72600890/13045193
+  const columnsToDelete = [];
+  for (let i = 1, maxColumns = sheet.getMaxColumns(); i <= maxColumns; i++) {
+    if (!columnsToKeep.some(columnNumber => i === columnNumber)) {
+      columnsToDelete.push(i);
+    }
+  }
+  const tuples = getRunLengths_(columnsToDelete).reverse();
+  tuples.forEach(([columnStart, numColumns]) => sheet.deleteColumns(columnStart, numColumns));
+}
+
+function getRunLengths_(numbers) {
+  // version 1.1, written by --Hyde, 31 May 2021
+  if (!numbers.length) {
+    return [];
+  }
+  return numbers.reduce((accumulator, value, index) => {
+    if (!index || value !== 1 + numbers[index - 1]) {
+      accumulator.push([value]);
+    }
+    const lastIndex = accumulator.length - 1;
+    accumulator[lastIndex][1] = (accumulator[lastIndex][1] || 0) + 1;
+    return accumulator;
+  }, []);
+}
